@@ -1,2 +1,1 @@
-# Physics-Sim
-Physics Sim using React
+check out https://github.com/Esraaj-Sarkar-Gupta/Physics-Sim
