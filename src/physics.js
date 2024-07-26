@@ -94,4 +94,115 @@ class PhysicsBody {
     }
 }
 
-export { PhysicsBody, Newtonian_Gravity };
+function detect_collision(b1, b2) {
+    let distance = b1.radius + b2.radius; 
+    let dx = b2.pos_x - b1.pos_x;
+    let dy = b2.pos_y - b1.pos_y;
+    let actualDistance = mag(dx, dy);
+    
+    if (actualDistance <= distance) {
+        console.log("Collision detected");
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+/*
+function collision(b1, b2){
+
+    //handing x axis collision 
+
+    let px = (b1.mass*b1.vel_x) + (b2.mass*b2.vel_x); //total initial momentum
+    let kx = (b1.mass*(b1.vel_x)**2) + (b2.mass*(b2.vel_x)**2); //total inital kinetic energy
+
+    let ax = (b2.mass/b1.mass) + (b2.mass**2);
+    let bx = -1*px*b2.mass;
+    let cx = (px**2) - (b1.mass*kx);
+
+    let v2x1 = (-bx + Math.sqrt(((bx**2)-(4*ax*cx))))/(2*ax); //quadratic formula to find final velocity of body 2
+    let v2x2 = (-bx - Math.sqrt(((bx**2)-(4*ax*cx))))/(2*ax);
+    let body_2_final_velocity_x = 0
+
+    /*After collision there has to be some change of velocity. 
+    Hence if initial and final are the same, it cannot be the correct solution.
+
+    if (v2x1 === b2.vel_x){
+        body_2_final_velocity_x = v2x2 
+    }
+    else {
+        body_2_final_velocity_x = v2x1
+    }
+
+    let body_1_final_velocity_x = (px-((b2.mass)*body_2_final_velocity_x))/b1.mass
+
+    //handling y axis collision
+
+    let py = (b1.mass*b1.vel_y) + (b2.mass*b2.vel_y); //total initial momentum
+    let ky = (b1.mass*(b1.vel_y)**2) + (b2.mass*(b2.vel_y)**2); //total inital kinetic energy
+
+    let ay = (b2.mass/b1.mass) + (b2.mass**2);
+    let by = -1*py*b2.mass;
+    let cy = (py**2) - (b1.mass*ky);
+
+    let v2y1 = (-by + Math.sqrt(((by**2)-(4*ay*cy))))/(2*ay); //quadratic formula to find final velocity of body 2
+    let v2y2 = (-by - Math.sqrt(((by**2)-(4*ay*cy))))/(2*ay);
+    let body_2_final_velocity_y = 0
+
+    if (v2y1 === b2.vel_y){
+        body_2_final_velocity_y = v2y2 
+    }
+    else {
+        body_2_final_velocity_y = v2y1
+    }
+
+    let body_1_final_velocity_y = (py-((b2.mass)*body_2_final_velocity_y))/b1.mass  
+
+    //new velocities
+    b1.vel_x = body_1_final_velocity_x
+    b2.vel_x = body_2_final_velocity_x
+    b1.vel_y = body_1_final_velocity_y
+    b2.vel_y = body_2_final_velocity_y
+
+    console.log(b1.vel_x,b1.vel_y, b2.vel_x, b2.vel_y)
+}
+*/
+
+function collision(b1, b2) {
+    // Calculate the distance between the two bodies
+    let dx = b2.pos_x - b1.pos_x;
+    let dy = b2.pos_y - b1.pos_y;
+    let distance = mag(dx, dy);
+
+    // Calculate the normal and tangent vectors
+    let normalX = dx / distance;
+    let normalY = dy / distance;
+    let tangentX = -normalY;
+    let tangentY = normalX;
+
+    // Project the velocities onto the normal and tangent vectors
+    let vel1n = b1.vel_x * normalX + b1.vel_y * normalY;
+    let vel1t = b1.vel_x * tangentX + b1.vel_y * tangentY;
+    let vel2n = b2.vel_x * normalX + b2.vel_y * normalY;
+    let vel2t = b2.vel_x * tangentX + b2.vel_y * tangentY;
+
+    // Calculate the new normal velocities using conservation of momentum
+    let vel1nFinal = (vel1n * (b1.mass - b2.mass) + 2 * b2.mass * vel2n) / (b1.mass + b2.mass);
+    let vel2nFinal = (vel2n * (b2.mass - b1.mass) + 2 * b1.mass * vel1n) / (b1.mass + b2.mass);
+
+    // The tangent velocities remain the same
+    let vel1tFinal = vel1t;
+    let vel2tFinal = vel2t;
+
+    // Convert the scalar normal and tangential velocities into vectors
+    b1.vel_x = vel1nFinal * normalX + vel1tFinal * tangentX;
+    b1.vel_y = vel1nFinal * normalY + vel1tFinal * tangentY;
+    b2.vel_x = vel2nFinal * normalX + vel2tFinal * tangentX;
+    b2.vel_y = vel2nFinal * normalY + vel2tFinal * tangentY;
+
+    console.log(`b1 final velocities: (${b1.vel_x}, ${b1.vel_y}), b2 final velocities: (${b2.vel_x}, ${b2.vel_y})`);
+}
+
+
+export { PhysicsBody, Newtonian_Gravity, collision, detect_collision };
